@@ -11,6 +11,7 @@ import com.thecherno.rain.graphics.Sprite;
 import com.thecherno.rain.graphics.SpriteSheet;
 import com.thecherno.rain.graphics.ui.UIActionListener;
 import com.thecherno.rain.graphics.ui.UIButton;
+import com.thecherno.rain.graphics.ui.UIButtonListener;
 import com.thecherno.rain.graphics.ui.UILabel;
 import com.thecherno.rain.graphics.ui.UIManager;
 import com.thecherno.rain.graphics.ui.UIPanel;
@@ -77,7 +78,7 @@ public class Player extends Mob {
 		
 		button = new UIButton(new Vector2i(10, 260), new Vector2i(100, 30), new UIActionListener() {
 			public void perform() {
-				System.exit(0);
+				System.out.println("Action Performed!");
 			}
 		});
 		button.setText("Hello");
