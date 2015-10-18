@@ -1,7 +1,8 @@
 package com.thecherno.rain.level;
 
 import java.util.ArrayList
-;import java.util.Collections;
+;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -9,16 +10,20 @@ import com.thecherno.rain.entity.Entity;
 import com.thecherno.rain.entity.mob.Player;
 import com.thecherno.rain.entity.particle.Particle;
 import com.thecherno.rain.entity.projectile.Projectile;
+import com.thecherno.rain.events.Event;
 import com.thecherno.rain.graphics.Screen;
+import com.thecherno.rain.graphics.layers.Layer;
 import com.thecherno.rain.level.tile.Tile;
 import com.thecherno.rain.util.Vector2i;
 
-public class Level {
+public class Level extends Layer {
 
 	protected int width, height;
 	protected int[] tilesInt;
 	protected int[] tiles;
 	protected int tile_size;
+	
+	private int xScroll, yScroll;
 
 	private List<Entity> entities = new ArrayList<Entity>();
 	private List<Projectile> projectiles = new ArrayList<Projectile>();
@@ -75,6 +80,10 @@ public class Level {
 		}
 		remove();
 	}
+	
+	public void onEvent(Event event) {
+		getClientPlayer().onEvent(event);	
+	}
 
 	private void remove() {
 		for (int i = 0; i < entities.size(); i++) {
@@ -107,8 +116,13 @@ public class Level {
 		}
 		return solid;
 	}
+	
+	public void setScroll(int xScroll, int yScroll) {
+		this.xScroll = xScroll;
+		this.yScroll = yScroll;
+	}
 
-	public void render(int xScroll, int yScroll, Screen screen) {
+	public void render(Screen screen) {
 		screen.setOffset(xScroll, yScroll);
 		int x0 = xScroll >> 4;
 		int x1 = (xScroll + screen.width + 16) >> 4;

@@ -7,19 +7,23 @@ import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JFrame;
 
 import com.thecherno.rain.entity.mob.Player;
-import com.thecherno.rain.graphics.Font;
+import com.thecherno.rain.events.Event;
+import com.thecherno.rain.events.EventListener;
 import com.thecherno.rain.graphics.Screen;
+import com.thecherno.rain.graphics.layers.Layer;
 import com.thecherno.rain.graphics.ui.UIManager;
 import com.thecherno.rain.input.Keyboard;
 import com.thecherno.rain.input.Mouse;
 import com.thecherno.rain.level.Level;
 import com.thecherno.rain.level.TileCoordinate;
 
-public class Game extends Canvas implements Runnable {
+public class Game extends Canvas implements Runnable, EventListener {
 	private static final long serialVersionUID = 1L;
 
 	private static int width = 300 - 80;
@@ -39,6 +43,8 @@ public class Game extends Canvas implements Runnable {
 	private Screen screen;
 	private BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 	private int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+	
+	private List<Layer> layerStack = new ArrayList<Layer>();
 
 	public Game() {
 		Dimension size = new Dimension(width * scale + 80 * 3, height * scale);
@@ -49,13 +55,14 @@ public class Game extends Canvas implements Runnable {
 		frame = new JFrame();
 		key = new Keyboard();
 		level = Level.spawn;
+		addLayer(level);
 		TileCoordinate playerSpawn = new TileCoordinate(19, 42);
 		player = new Player("Cherno", playerSpawn.x(), playerSpawn.y(), key);
 		level.add(player);
 		
 		addKeyListener(key);
 
-		Mouse mouse = new Mouse();
+		Mouse mouse = new Mouse(this);
 		addMouseListener(mouse);
 		addMouseMotionListener(mouse);
 	}
@@ -70,6 +77,10 @@ public class Game extends Canvas implements Runnable {
 	
 	public static UIManager getUIManager() {
 		return uiManager;
+	}
+	
+	public void addLayer(Layer layer) {
+		layerStack.add(layer);
 	}
 
 	public synchronized void start() {
@@ -117,11 +128,21 @@ public class Game extends Canvas implements Runnable {
 		}
 		stop();
 	}
+	
+	public void onEvent(Event event) {
+		for (int i = layerStack.size() - 1; i >= 0; i--) {
+			layerStack.get(i).onEvent(event);
+		}
+	}
 
 	public void update() {
 		key.update();
-		level.update();
 		uiManager.update();
+		
+		// Update layers here
+		for (int i = 0; i < layerStack.size(); i++) {
+			layerStack.get(i).update();
+		}
 	}
 
 	public void render() {
@@ -134,7 +155,13 @@ public class Game extends Canvas implements Runnable {
 		screen.clear();
 		int xScroll = player.getX() - screen.width / 2;
 		int yScroll = player.getY() - screen.height / 2;
-		level.render(xScroll, yScroll, screen);
+		level.setScroll(xScroll, yScroll);
+
+		// Render layers here
+		for (int i = 0; i < layerStack.size(); i++) {
+			layerStack.get(i).render(screen);
+		}
+		
 		// font.render(50, 50, -3, "Hey what's up\nguys, My name is\nThe Cherno!", screen);
 		// screen.renderSheet(40, 40, SpriteSheet.player_down, false);
 		for (int i = 0; i < pixels.length; i++) {
