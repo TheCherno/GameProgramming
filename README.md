@@ -1,4 +1,4 @@
-GameProgramming
-===============
+Game Programming
+================
 
-The Game Programming YouTube series PRIVATE repository.
+The official (secret) Game Programming repository! Thank you for the support! <3
