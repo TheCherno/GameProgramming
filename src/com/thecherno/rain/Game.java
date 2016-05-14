@@ -22,6 +22,7 @@ import com.thecherno.rain.input.Keyboard;
 import com.thecherno.rain.input.Mouse;
 import com.thecherno.rain.level.Level;
 import com.thecherno.rain.level.TileCoordinate;
+import com.thecherno.rain.net.player.NetPlayer;
 
 public class Game extends Canvas implements Runnable, EventListener {
 	private static final long serialVersionUID = 1L;
@@ -59,7 +60,7 @@ public class Game extends Canvas implements Runnable, EventListener {
 		TileCoordinate playerSpawn = new TileCoordinate(19, 42);
 		player = new Player("Cherno", playerSpawn.x(), playerSpawn.y(), key);
 		level.add(player);
-		
+		level.addPlayer(new NetPlayer());
 		addKeyListener(key);
 
 		Mouse mouse = new Mouse(this);

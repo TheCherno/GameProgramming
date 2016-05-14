@@ -6,6 +6,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import com.thecherno.rain.entity.mob.Dummy;
+import com.thecherno.rain.entity.mob.Player;
 import com.thecherno.rain.entity.mob.Shooter;
 
 public class SpawnLevel extends Level {
