@@ -23,6 +23,9 @@ import com.thecherno.rain.input.Mouse;
 import com.thecherno.rain.level.Level;
 import com.thecherno.rain.level.TileCoordinate;
 import com.thecherno.rain.net.player.NetPlayer;
+import com.thecherno.raincloud.serialization.RCDatabase;
+import com.thecherno.raincloud.serialization.RCField;
+import com.thecherno.raincloud.serialization.RCObject;
 
 public class Game extends Canvas implements Runnable, EventListener {
 	private static final long serialVersionUID = 1L;
@@ -42,14 +45,13 @@ public class Game extends Canvas implements Runnable, EventListener {
 	private static UIManager uiManager;
 
 	private Screen screen;
-	private BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-	private int[] pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+	private BufferedImage image;
+	private int[] pixels;
 	
 	private List<Layer> layerStack = new ArrayList<Layer>();
 
 	public Game() {
-		Dimension size = new Dimension(width * scale + 80 * 3, height * scale);
-		setPreferredSize(size);
+		setSize();
 
 		screen = new Screen(width, height);
 		uiManager = new UIManager();
@@ -66,6 +68,36 @@ public class Game extends Canvas implements Runnable, EventListener {
 		Mouse mouse = new Mouse(this);
 		addMouseListener(mouse);
 		addMouseMotionListener(mouse);
+		
+		save();
+	}
+	
+	private void setSize() {
+		RCDatabase db = RCDatabase.DeserializeFromFile("res/data/screen.bin");
+		if (db != null) {
+			RCObject obj = db.findObject("Resolution");
+			width = obj.findField("width").getInt();
+			height = obj.findField("height").getInt();
+			scale = obj.findField("scale").getInt();
+		}
+		
+		Dimension size = new Dimension(width * scale + 80 * 3, height * scale);
+		setPreferredSize(size);
+		
+		image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+	}
+	
+	private void save() {
+		RCDatabase db = new RCDatabase("Screen");
+		
+		RCObject obj = new RCObject("Resolution");
+		obj.addField(RCField.Integer("width", width));
+		obj.addField(RCField.Integer("height", height));
+		obj.addField(RCField.Integer("scale", scale));
+		db.addObject(obj);
+		
+		db.serializeToFile("res/data/screen.bin");
 	}
 
 	public static int getWindowWidth() {
@@ -190,7 +222,6 @@ public class Game extends Canvas implements Runnable, EventListener {
 		game.frame.setVisible(true);
 
 		game.start();
-
 	}
 
 }
