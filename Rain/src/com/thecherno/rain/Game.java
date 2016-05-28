@@ -22,6 +22,7 @@ import com.thecherno.rain.input.Keyboard;
 import com.thecherno.rain.input.Mouse;
 import com.thecherno.rain.level.Level;
 import com.thecherno.rain.level.TileCoordinate;
+import com.thecherno.rain.net.RainClient;
 import com.thecherno.rain.net.player.NetPlayer;
 import com.thecherno.raincloud.serialization.RCDatabase;
 import com.thecherno.raincloud.serialization.RCField;
@@ -49,6 +50,8 @@ public class Game extends Canvas implements Runnable, EventListener {
 	private int[] pixels;
 	
 	private List<Layer> layerStack = new ArrayList<Layer>();
+	
+	private RainClient client;
 
 	public Game() {
 		setSize();
@@ -57,23 +60,30 @@ public class Game extends Canvas implements Runnable, EventListener {
 		uiManager = new UIManager();
 		frame = new JFrame();
 		key = new Keyboard();
+		addKeyListener(key);
+		Mouse mouse = new Mouse(this);
+		addMouseListener(mouse);
+		addMouseMotionListener(mouse);
+
+		String address = "localhost";
+		int port = 8192;
+		// TODO: Connect to server here
+		client = new RainClient(address, port);
+		if (client.connect()) {
+			System.out.println("Successfully connected to server!");
+		}
 		level = Level.spawn;
 		addLayer(level);
 		TileCoordinate playerSpawn = new TileCoordinate(19, 42);
 		player = new Player("Cherno", playerSpawn.x(), playerSpawn.y(), key);
 		level.add(player);
 		level.addPlayer(new NetPlayer());
-		addKeyListener(key);
-
-		Mouse mouse = new Mouse(this);
-		addMouseListener(mouse);
-		addMouseMotionListener(mouse);
 		
 		save();
 	}
-	
+	RCDatabase db;
 	private void setSize() {
-		RCDatabase db = RCDatabase.DeserializeFromFile("res/data/screen.bin");
+		db = RCDatabase.DeserializeFromFile("res/data/screen.bin");
 		if (db != null) {
 			RCObject obj = db.findObject("Resolution");
 			width = obj.findField("width").getInt();
@@ -83,7 +93,8 @@ public class Game extends Canvas implements Runnable, EventListener {
 		
 		Dimension size = new Dimension(width * scale + 80 * 3, height * scale);
 		setPreferredSize(size);
-		
+
+		// TODO: Remove from this function
 		image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 		pixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
 	}
