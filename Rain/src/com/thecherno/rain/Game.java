@@ -57,6 +57,9 @@ public class Game extends Canvas implements Runnable, EventListener {
 		uiManager = new UIManager();
 		frame = new JFrame();
 		key = new Keyboard();
+		
+		// TODO: Connect to server here!
+		
 		level = Level.spawn;
 		addLayer(level);
 		TileCoordinate playerSpawn = new TileCoordinate(19, 42);
