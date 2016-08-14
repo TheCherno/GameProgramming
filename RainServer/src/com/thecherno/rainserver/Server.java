@@ -5,6 +5,10 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
+import java.util.Arrays;
+
+import com.thecherno.raincloud.serialization.RCDatabase;
 
 public class Server {
 
@@ -13,6 +17,9 @@ public class Server {
 	private boolean listening = false;
 	private DatagramSocket socket;
 	
+	private final int MAX_PACKET_SIZE = 1024;
+	private byte[] receivedDataBuffer = new byte[MAX_PACKET_SIZE * 10];
+
 	public Server(int port) {
 		this.port = port;
 	}
@@ -27,17 +34,44 @@ public class Server {
 		
 		listening = true;
 		
-		listenThread = new Thread(() -> listen());
+		listenThread = new Thread(() -> listen(), "RainCloudServer-ListenThread");
 		listenThread.start();
 	}
 	
 	private void listen() {
 		while (listening) {
-			
+			DatagramPacket packet = new DatagramPacket(receivedDataBuffer, MAX_PACKET_SIZE);
+			try {
+				socket.receive(packet);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			process(packet);
 		}
 	}
 	
 	private void process(DatagramPacket packet) {
+		byte[] data = packet.getData();
+		if (new String(data, 0, 4).equals("RCDB")) {
+			RCDatabase database = RCDatabase.Deserialize(data);
+			String username = database.findObject("root").findString("username").getString();
+			process(database);
+		} else {
+			switch (data[0]) {
+			case 1:
+				// Connection packet
+				break;
+			case 2:
+				// Ping packet
+				break;
+			case 3:
+				// Login attempt packet
+				break;
+			}
+		}
+	}
+	
+	private void process(RCDatabase database) {
 		
 	}
 	
