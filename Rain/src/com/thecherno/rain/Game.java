@@ -22,6 +22,7 @@ import com.thecherno.rain.input.Keyboard;
 import com.thecherno.rain.input.Mouse;
 import com.thecherno.rain.level.Level;
 import com.thecherno.rain.level.TileCoordinate;
+import com.thecherno.rain.net.Client;
 import com.thecherno.rain.net.player.NetPlayer;
 import com.thecherno.raincloud.serialization.RCDatabase;
 import com.thecherno.raincloud.serialization.RCField;
@@ -59,6 +60,11 @@ public class Game extends Canvas implements Runnable, EventListener {
 		key = new Keyboard();
 		
 		// TODO: Connect to server here!
+		Client client = new Client("localhost", 8192);
+		client.connect();
+		
+		RCDatabase db = RCDatabase.DeserializeFromFile("res/data/screen.bin");
+		client.send(db);
 		
 		level = Level.spawn;
 		addLayer(level);
