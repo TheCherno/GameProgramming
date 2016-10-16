@@ -7,6 +7,8 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.thecherno.raincloud.serialization.RCDatabase;
 import com.thecherno.raincloud.serialization.RCField;
@@ -22,6 +24,8 @@ public class Server {
 	
 	private final int MAX_PACKET_SIZE = 1024;
 	private byte[] receivedDataBuffer = new byte[MAX_PACKET_SIZE * 10];
+	
+	private Set<ServerClient> clients = new HashSet<ServerClient>();
 
 	public Server(int port) {
 		this.port = port;
@@ -35,10 +39,13 @@ public class Server {
 			return;
 		}
 		
+		System.out.println("Started server on port 8192...");
+		
 		listening = true;
 		
 		listenThread = new Thread(() -> listen(), "RainCloudServer-ListenThread");
 		listenThread.start();
+		System.out.println("Server is listening...");
 	}
 	
 	private void listen() {
@@ -62,10 +69,10 @@ public class Server {
 		if (new String(data, 0, 4).equals("RCDB")) {
 			RCDatabase database = RCDatabase.Deserialize(data);
 			process(database);
-		} else {
-			switch (data[0]) {
-			case 1:
-				// Connection packet
+		} else if (data[0] == 0x40 && data[1] == 0x40) {
+			switch (data[2]) {
+			case 0x01:
+				clients.add(new ServerClient(packet.getAddress(), packet.getPort()));
 				break;
 			case 2:
 				// Ping packet
@@ -103,7 +110,15 @@ public class Server {
 		System.out.println("\t" + address.getHostAddress() + ":" + port);
 		System.out.println();
 		System.out.println("\tContents:");
-		System.out.println("\t\t" + new String(data));
+		System.out.print("\t\t");
+		
+		for (int i = 0; i < packet.getLength(); i++) {
+			System.out.printf("%x ", data[i]);
+			if ((i + 1) % 16 == 0)
+				System.out.print("\n\t\t");
+		}
+		
+		System.out.println();
 		System.out.println("----------------------------------------");
 	}
 	

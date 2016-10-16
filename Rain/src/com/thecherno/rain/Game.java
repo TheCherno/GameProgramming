@@ -61,10 +61,12 @@ public class Game extends Canvas implements Runnable, EventListener {
 		
 		// TODO: Connect to server here!
 		Client client = new Client("localhost", 8192);
-		client.connect();
+		if (!client.connect()) {
+			// TODO: We didn't connect
+		}
 		
 		RCDatabase db = RCDatabase.DeserializeFromFile("res/data/screen.bin");
-		client.send(db);
+		// client.send(db);
 		
 		level = Level.spawn;
 		addLayer(level);
