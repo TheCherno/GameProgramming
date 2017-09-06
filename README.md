@@ -1,6 +1,4 @@
 Game Programming
 ================
 
-The official (secret) Game Programming repository! Thank you for the support! <3
-
-Important Note: Please do not push to or modify the repository in any way. Doing so will result in revoked access.
+Welcome to the official Game Programming repository! This is the source code from a YouTube series you can find here: https://www.youtube.com/playlist?list=PLlrATfBNZ98eOOCk2fOFg7Qg5yoQfFAdf
